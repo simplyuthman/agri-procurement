@@ -1,0 +1,129 @@
+digraph ERD {
+    graph [
+        rankdir=LR,
+        fontname="Helvetica",
+        bgcolor="white",
+        splines=curved,
+        nodesep=0.9,
+        ranksep=1.4,
+        label="Agricultural Procurement & Supply Coordination Platform — Entity Model",
+        labelloc="t",
+        fontsize=20,
+        fontcolor="#1f2937"
+    ];
+
+    node [
+        shape=plaintext,
+        fontname="Helvetica"
+    ];
+
+    edge [
+        fontname="Helvetica",
+        fontsize=11,
+        fontcolor="#374151",
+        color="#6b7280",
+        penwidth=1.3
+    ];
+
+    // ---------- USER ----------
+    USER [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#9ca3af" BGCOLOR="white">
+      <TR><TD BGCOLOR="#2563eb" ALIGN="CENTER"><FONT COLOR="white"><B>User</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="id"><B>PK</B> id : UUID</TD></TR>
+      <TR><TD ALIGN="LEFT">name : string</TD></TR>
+      <TR><TD ALIGN="LEFT">email : string (unique)</TD></TR>
+      <TR><TD ALIGN="LEFT">phone : string</TD></TR>
+      <TR><TD ALIGN="LEFT">role : enum(aggregator, farmer)</TD></TR>
+      <TR><TD ALIGN="LEFT">createdAt / updatedAt</TD></TR>
+      <TR><TD ALIGN="LEFT">deletedAt : nullable</TD></TR>
+    </TABLE>>];
+
+    // ---------- FARMER ----------
+    FARMER [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#9ca3af" BGCOLOR="white">
+      <TR><TD BGCOLOR="#059669" ALIGN="CENTER"><FONT COLOR="white"><B>Farmer</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="id"><B>PK</B> id : UUID</TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="userId"><B>FK</B> userId &#8594; User.id (unique)</TD></TR>
+      <TR><TD ALIGN="LEFT">location : string</TD></TR>
+      <TR><TD ALIGN="LEFT">createdAt / updatedAt</TD></TR>
+      <TR><TD ALIGN="LEFT">deletedAt : nullable</TD></TR>
+    </TABLE>>];
+
+    // ---------- BUYER ----------
+    BUYER [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#9ca3af" BGCOLOR="white">
+      <TR><TD BGCOLOR="#059669" ALIGN="CENTER"><FONT COLOR="white"><B>Buyer</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="id"><B>PK</B> id : UUID</TD></TR>
+      <TR><TD ALIGN="LEFT">name : string</TD></TR>
+      <TR><TD ALIGN="LEFT">contactEmail : string, optional</TD></TR>
+      <TR><TD ALIGN="LEFT">contactPhone : string, optional</TD></TR>
+      <TR><TD ALIGN="LEFT">createdAt / updatedAt</TD></TR>
+      <TR><TD ALIGN="LEFT">deletedAt : nullable</TD></TR>
+    </TABLE>>];
+
+    // ---------- SUPPLY ----------
+    SUPPLY [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#9ca3af" BGCOLOR="white">
+      <TR><TD BGCOLOR="#d97706" ALIGN="CENTER"><FONT COLOR="white"><B>Supply</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="id"><B>PK</B> id : UUID</TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="farmerId"><B>FK</B> farmerId &#8594; Farmer.id</TD></TR>
+      <TR><TD ALIGN="LEFT">produce : string</TD></TR>
+      <TR><TD ALIGN="LEFT">quantity : decimal (&#8805; 0)</TD></TR>
+      <TR><TD ALIGN="LEFT">unit : enum(kg, ton, bag, crate)</TD></TR>
+      <TR><TD ALIGN="LEFT">availableDate : date</TD></TR>
+      <TR><TD ALIGN="LEFT">status : enum(available, partially_&#8203;allocated,<BR ALIGN="LEFT"/>&#160;&#160;&#160;fully_allocated, withdrawn)</TD></TR>
+      <TR><TD ALIGN="LEFT">createdAt / updatedAt</TD></TR>
+      <TR><TD ALIGN="LEFT">deletedAt : nullable</TD></TR>
+    </TABLE>>];
+
+    // ---------- ORDER ----------
+    ORDER [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#9ca3af" BGCOLOR="white">
+      <TR><TD BGCOLOR="#d97706" ALIGN="CENTER"><FONT COLOR="white"><B>Order</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="id"><B>PK</B> id : UUID</TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="buyerId"><B>FK</B> buyerId &#8594; Buyer.id</TD></TR>
+      <TR><TD ALIGN="LEFT">produce : string</TD></TR>
+      <TR><TD ALIGN="LEFT">requiredQuantity : decimal (&gt; 0)</TD></TR>
+      <TR><TD ALIGN="LEFT">fulfilledQuantity : decimal (default 0)</TD></TR>
+      <TR><TD ALIGN="LEFT">unit : enum(kg, ton, bag, crate)</TD></TR>
+      <TR><TD ALIGN="LEFT">requiredDate : date</TD></TR>
+      <TR><TD ALIGN="LEFT">deliveryLocation : string</TD></TR>
+      <TR><TD ALIGN="LEFT">status : enum(pending, partially_&#8203;fulfilled,<BR ALIGN="LEFT"/>&#160;&#160;&#160;fully_fulfilled, completed, cancelled)</TD></TR>
+      <TR><TD ALIGN="LEFT">createdAt / updatedAt</TD></TR>
+      <TR><TD ALIGN="LEFT">cancelledAt : nullable</TD></TR>
+    </TABLE>>];
+
+    // ---------- SUPPLY_ALLOCATION ----------
+    ALLOC [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#9ca3af" BGCOLOR="white">
+      <TR><TD BGCOLOR="#7c3aed" ALIGN="CENTER"><FONT COLOR="white"><B>SupplyAllocation</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="id"><B>PK</B> id : UUID</TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="supplyId"><B>FK</B> supplyId &#8594; Supply.id</TD></TR>
+      <TR><TD ALIGN="LEFT" PORT="orderId"><B>FK</B> orderId &#8594; Order.id</TD></TR>
+      <TR><TD ALIGN="LEFT">quantity : decimal (&gt; 0)</TD></TR>
+      <TR><TD ALIGN="LEFT">farmerNameSnapshot : string</TD></TR>
+      <TR><TD ALIGN="LEFT">idempotencyKey : string (unique)</TD></TR>
+      <TR><TD ALIGN="LEFT">createdAt / updatedAt</TD></TR>
+    </TABLE>>];
+
+    // ---------- Relationships ----------
+    USER:e -> FARMER:w [dir=both, arrowtail=tee, arrowhead=teeodot,
+        label="1   is-a (if role=farmer)   0..1"];
+
+    FARMER:e -> SUPPLY:w [dir=both, arrowtail=tee, arrowhead=crowodot,
+        label="1   lists   0..*"];
+
+    BUYER:e -> ORDER:w [dir=both, arrowtail=tee, arrowhead=crowodot,
+        label="1   places   0..*"];
+
+    SUPPLY:e -> ALLOC:w [dir=both, arrowtail=tee, arrowhead=crowodot,
+        label="1   allocated via   0..*"];
+
+    ORDER:e -> ALLOC:w [dir=both, arrowtail=tee, arrowhead=crowodot,
+        label="1   fulfilled via   0..*"];
+
+    { rank=same; USER; BUYER; }
+    { rank=same; FARMER; ORDER; }
+    { rank=same; SUPPLY; }
+    { rank=same; ALLOC; }
+}
